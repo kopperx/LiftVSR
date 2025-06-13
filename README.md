@@ -7,7 +7,7 @@
 
 <div>
     <a href='https://scholar.google.com/citations?user=ccQh444AAAAJ' target='_blank'>Xijun Wang</a>&emsp;
-    <a href='todo' target='_blank'>Xin Li</a>&emsp;
+    <a href='https://scholar.google.com/citations?user=sbiY97gAAAAJ' target='_blank'>Xin Li</a>&emsp;
     <a href='todo' target='_blank'>Bingcheng Li</a>&emsp;
     <a href='todo' target='_blank'>Zhibo Chen</a>
 
