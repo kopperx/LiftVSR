@@ -6,7 +6,7 @@
 </h1>
 
 <div>
-    <a href='todo' target='_blank'>Xijun Wang</a>&emsp;
+    <a href='https://scholar.google.com/citations?user=ccQh444AAAAJ' target='_blank'>Xijun Wang</a>&emsp;
     <a href='todo' target='_blank'>Xin Li</a>&emsp;
     <a href='todo' target='_blank'>Bingcheng Li</a>&emsp;
     <a href='todo' target='_blank'>Zhibo Chen</a>
@@ -37,3 +37,21 @@
 
 ## 🎬 Overview
 ![overall_structure](assets/liftvsr_pipe.png)
+
+## 🎓Citations
+If our project helps your research or work, please consider citing our paper:
+
+```
+@misc{wang2025liftvsrliftingimagediffusion,
+      title={LiftVSR: Lifting Image Diffusion to Video Super-Resolution via Hybrid Temporal Modeling with Only 4$\times$RTX 4090s}, 
+      author={Xijun Wang and Xin Li and Bingchen Li and Zhibo Chen},
+      year={2025},
+      eprint={2506.08529},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV},
+      url={https://arxiv.org/abs/2506.08529}, 
+}
+```
+
+## 📧 Contact
+If you have any questions, please don't hesitate to reach out via email at `xijunwang00@gmail.com`
