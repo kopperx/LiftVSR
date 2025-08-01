@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="LiftVSR.">
+  <meta name="keywords" content="Video Super-Resolution, Diffusion transformer">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LiftVSR</title>
+
+  <!-- Latex -->
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]},
+        TeX: { equationNumbers: { autoNumber: "AMS" } },
+      });
+      </script>
+  <script type="text/javascript" async
+    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML">
+    </script>
+
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
+  <link rel="stylesheet" href="../static/css/bulma.min.css">
+  <link rel="stylesheet" href="../static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="../static/css/bulma-slider.min.css">
+  <link rel="stylesheet" href="../static/css/fontawesome.all.min.css">
+  <link rel="stylesheet" href="../static/css/index.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="../static/js/fontawesome.all.min.js"></script>
+  <script src="../static/js/bulma-carousel.min.js"></script>
+  <script src="../static/js/bulma-slider.min.js"></script>
+  <script src="../static/js/index.js"></script>
+
+  <!-- Vendor Stylesheets -->
+  <!--=================js==========================-->
+  <link rel="stylesheet" href="../static/css/tab_gallery.css">
+  <link rel="stylesheet" href="../static/css/juxtapose.css">
+  <!-- <script src="./static/js/index.js"></script> -->
+  <!-- <link rel="stylesheet" href="./menlo"> -->
+  <link rel="stylesheet" href="../static/css/image_card_fader.css">
+  <link rel="stylesheet" href="../static/css/image_card_slider.css">
+
+  <!-- custom css file  -->
+  <link rel="stylesheet" href="../static/css/style.css">
+  <link rel="stylesheet" href="../static/css/twentytwenty.css">
+</head>
+
+<body>
+
+  <section class="hero">
+    <div class="hero-body">
+      <div class="container is-max-desktop">
+        <div class="columns is-centered">
+          <div class="column has-text-centered">
+
+            <h1 class="title is-2 publication-title">
+              <span style="color: #EA4335;">L</span><span style="color: #4285F4;">ift</span><span
+                style="color: #FBBC05;">V</span><span style="color: #34A853;">SR</span>
+            </h1>
+
+            <h1 class="title is-3 publication-title">
+              Lifting Image Diffusion to Video Super-Resolution
+            </h1>
+
+            <h1 class="title is-3 publication-title">
+              via Hybrid Temporal Modeling with Only 4×RTX4090s
+            </h1>
+
+            <div class="is-size-5 publication-authors">
+              <span class="author-block">
+                <a href="https://scholar.google.com/citations?user=ccQh444AAAAJ">Xijun Wang</a><sup>1</sup>,&nbsp;&nbsp;</span>
+              <span class="author-block">
+                <a href="https://scholar.google.com/citations?user=sbiY97gAAAAJ">Xin Li</a><sup>1</sup>,&nbsp;&nbsp;</span>
+              <span class="author-block">
+                <a href="https://scholar.google.com/citations?user=qHeWjNwAAAAJ">Bingcheng Li</a><sup>1</sup>,&nbsp;&nbsp;</span>
+              <span class="author-block">
+                <a href="https://scholar.google.com/citations?user=1ayDJfsAAAAJ">Zhibo Chen</a><sup>1</sup>&nbsp;&nbsp;</span>
+            </div>
+
+            <div class="is-size-5 publication-authors">
+              <span class="author-block"><sup>1</sup>University of Science and Technology of China&nbsp;&nbsp;</span>
+            </div>
+
+            <!-- <div class="is-size-6 publication-authors">
+              <span class="author-block"><sup>&dagger;</sup>Corresponding authors</span>
+            </div> -->
+
+            <div class="column has-text-centered">
+              <div class="publication-links">
+                <!-- arXiv Link. -->
+                <span class="link-block">
+                  <a href="https://arxiv.org/abs/2506.08529" class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon">
+                      <i class="fas fa-file-pdf"></i>
+                    </span>
+                    <span>Paper</span>
+                  </a>
+                </span>
+                <!-- Code Link. -->
+                <span class="link-block">
+                  <a href="https://github.com/kopperx/LiftVSR" class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon">
+                      <i class="fab fa-github"></i>
+                    </span>
+                    <span>Code</span>
+                  </a>
+              </div>
+
+              <!-- <div class="is-size-5 publication-authors">
+                <span class="author-block">Code may be released upon the approval of ByteDance</span>
+              </div> -->
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- first row -->
+  <section class="hero is-light is-small">
+    <div class="hero-body">
+      <div class="columns is-centered has-text-centered">
+        <h2 class="title is-3">AIGC Videos</h2>
+      </div>
+      <div class="container">
+        <div id="results-carousel" class="carousel results-carousel">
+
+          <div class="item">
+            <div class="twentytwenty-container" data-orientation="horizontal" ratio="0.5556">
+              <div class="desc">AIGC</div>
+              <div class="video">
+                <video muted autoplay="autoplay" loop="loop" width="100%">
+                  <source
+                    src="videos/lqs/aigc_1.mp4"
+                    type="video/mp4">
+                </video>
+              </div>
+              <div class="video">
+                <video muted autoplay="autoplay" loop="loop" width="100%">
+                  <source
+                    src="videos/hqs/aigc_1.mp4"
+                    type="video/mp4">
+                </video>
+              </div>
+            </div>
+          </div>
+
+          <div class="item">
+            <div class="twentytwenty-container" data-orientation="horizontal" ratio="0.5556">
+              <div class="desc">AIGC</div>
+              <div class="video">
+                <video muted autoplay="autoplay" loop="loop" width="100%">
+                  <source
+                    src="videos/lqs/aigc_10.mp4"
+                    type="video/mp4">
+                </video>
+              </div>
+              <div class="video">
+                <video muted autoplay="autoplay" loop="loop" width="100%">
+                  <source
+                    src="videos/hqs/aigc_10.mp4"
+                    type="video/mp4">
+                </video>
+              </div>
+            </div>
+          </div>
+
+          <div class="item">
+            <div class="twentytwenty-container" data-orientation="horizontal" ratio="0.5556">
+              <div class="desc">AIGC</div>
+              <div class="video">
+                <video muted autoplay="autoplay" loop="loop" width="100%">
+                  <source
+                    src="videos/lqs/aigc_14.mp4"
+                    type="video/mp4">
+                </video>
+              </div>
+              <div class="video">
+                <video muted autoplay="autoplay" loop="loop" width="100%">
+                  <source
+                    src="videos/hqs/aigc_14.mp4"
+                    type="video/mp4">
+                </video>
+              </div>
+            </div>
+          </div>
+
+          <div class="item">
+            <div class="twentytwenty-container" data-orientation="horizontal" ratio="0.5556">
+              <div class="desc">AIGC</div>
+              <div class="video">
+                <video muted autoplay="autoplay" loop="loop" width="100%">
+                  <source
+                    src="videos/lqs/aigc_19.mp4"
+                    type="video/mp4">
+                </video>
+              </div>
+              <div class="video">
+                <video muted autoplay="autoplay" loop="loop" width="100%">
+                  <source
+                    src="videos/hqs/aigc_19.mp4"
+                    type="video/mp4">
+                </video>
+              </div>
+            </div>
+          </div>
+
+          <div class="item">
+            <div class="twentytwenty-container" data-orientation="horizontal" ratio="0.5556">
+              <div class="desc">AIGC</div>
+              <div class="video">
+                <video muted autoplay="autoplay" loop="loop" width="100%">
+                  <source
+                    src="videos/lqs/aigc_34.mp4"
+                    type="video/mp4">
+                </video>
+              </div>
+              <div class="video">
+                <video muted autoplay="autoplay" loop="loop" width="100%">
+                  <source
+                    src="videos/hqs/aigc_34.mp4"
+                    type="video/mp4">
+                </video>
+              </div>
+            </div>
+          </div>
+
+          <div class="item">
+            <div class="twentytwenty-container" data-orientation="horizontal" ratio="0.5556">
+              <div class="desc">AIGC</div>
+              <div class="video">
+                <video muted autoplay="autoplay" loop="loop" width="100%">
+                  <source
+                    src="videos/lqs/aigc_37.mp4"
+                    type="video/mp4">
+                </video>
+              </div>
+              <div class="video">
+                <video muted autoplay="autoplay" loop="loop" width="100%">
+                  <source
+                    src="videos/hqs/aigc_37.mp4"
+                    type="video/mp4">
+                </video>
+              </div>
+            </div>
+          </div>
+
+          <div class="item">
+            <div class="twentytwenty-container" data-orientation="horizontal" ratio="0.5556">
+              <div class="desc">AIGC</div>
+              <div class="video">
+                <video muted autoplay="autoplay" loop="loop" width="100%">
+                  <source
+                    src="videos/lqs/aigc_45.mp4"
+                    type="video/mp4">
+                </video>
+              </div>
+              <div class="video">
+                <video muted autoplay="autoplay" loop="loop" width="100%">
+                  <source
+                    src="videos/hqs/aigc_45.mp4"
+                    type="video/mp4">
+                </video>
+              </div>
+            </div>
+          </div>
+
+          <div class="item">
+            <div class="twentytwenty-container" data-orientation="horizontal" ratio="0.5556">
+              <div class="desc">AIGC</div>
+              <div class="video">
+                <video muted autoplay="autoplay" loop="loop" width="100%">
+                  <source
+                    src="videos/lqs/aigc_17.mp4"
+                    type="video/mp4">
+                </video>
+              </div>
+              <div class="video">
+                <video muted autoplay="autoplay" loop="loop" width="100%">
+                  <source
+                    src="videos/hqs/aigc_17.mp4"
+                    type="video/mp4">
+                </video>
+              </div>
+            </div>
+          </div>
+
+          <div class="item">
+            <div class="twentytwenty-container" data-orientation="horizontal" ratio="0.5556">
+              <div class="desc">AIGC</div>
+              <div class="video">
+                <video muted autoplay="autoplay" loop="loop" width="100%">
+                  <source
+                    src="videos/lqs/aigc_35.mp4"
+                    type="video/mp4">
+                </video>
+              </div>
+              <div class="video">
+                <video muted autoplay="autoplay" loop="loop" width="100%">
+                  <source
+                    src="videos/hqs/aigc_35.mp4"
+                    type="video/mp4">
+                </video>
+              </div>
+            </div>
+          </div>
+
+          <div class="item">
+            <div class="twentytwenty-container" data-orientation="horizontal" ratio="0.5556">
+              <div class="desc">AIGC</div>
+              <div class="video">
+                <video muted autoplay="autoplay" loop="loop" width="100%">
+                  <source
+                    src="videos/lqs/aigc_4.mp4"
+                    type="video/mp4">
+                </video>
+              </div>
+              <div class="video">
+                <video muted autoplay="autoplay" loop="loop" width="100%">
+                  <source
+                    src="videos/hqs/aigc_4.mp4"
+                    type="video/mp4">
+                </video>
+              </div>
+            </div>
+          </div>
+
+          <div class="item">
+            <div class="twentytwenty-container" data-orientation="horizontal" ratio="0.5556">
+              <div class="desc">AIGC</div>
+              <div class="video">
+                <video muted autoplay="autoplay" loop="loop" width="100%">
+                  <source
+                    src="videos/lqs/aigc_2.mp4"
+                    type="video/mp4">
+                </video>
+              </div>
+              <div class="video">
+                <video muted autoplay="autoplay" loop="loop" width="100%">
+                  <source
+                    src="videos/hqs/aigc_2.mp4"
+                    type="video/mp4">
+                </video>
+              </div>
+            </div>
+          </div>
+
+          <div class="item">
+            <div class="twentytwenty-container" data-orientation="horizontal" ratio="0.5556">
+              <div class="desc">AIGC</div>
+              <div class="video">
+                <video muted autoplay="autoplay" loop="loop" width="100%">
+                  <source
+                    src="videos/lqs/aigc_12.mp4"
+                    type="video/mp4">
+                </video>
+              </div>
+              <div class="video">
+                <video muted autoplay="autoplay" loop="loop" width="100%">
+                  <source
+                    src="videos/hqs/aigc_12.mp4"
+                    type="video/mp4">
+                </video>
+              </div>
+            </div>
+          </div>
+
+          <div class="item">
+            <div class="twentytwenty-container" data-orientation="horizontal" ratio="0.5556">
+              <div class="desc">AIGC</div>
+              <div class="video">
+                <video muted autoplay="autoplay" loop="loop" width="100%">
+                  <source
+                    src="videos/lqs/aigc_9.mp4"
+                    type="video/mp4">
+                </video>
+              </div>
+              <div class="video">
+                <video muted autoplay="autoplay" loop="loop" width="100%">
+                  <source
+                    src="videos/hqs/aigc_9.mp4"
+                    type="video/mp4">
+                </video>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+  </section>
+
+
+  <!-- second row -->
+  <section class="hero is-light is-small">
+    <div class="hero-body">
+      <div class="columns is-centered has-text-centered">
+        <h2 class="title is-3">Real-World Videos</h2>
+      </div>
+      <div class="container">
+        <div id="results-carousel" class="carousel results-carousel">
+
+          <div class="item">
+            <div class="twentytwenty-container" data-orientation="horizontal" ratio="0.5556">
+              <div class="desc">VideoLQ</div>
+              <div class="video">
+                <video muted autoplay="autoplay" loop="loop" width="100%">
+                  <source
+                    src="videos/lqs/videolq_012.mp4"
+                    type="video/mp4">
+                </video>
+              </div>
+              <div class="video">
+                <video muted autoplay="autoplay" loop="loop" width="100%">
+                  <source
+                    src="videos/hqs/videolq_012.mp4"
+                    type="video/mp4">
+                </video>
+              </div>
+            </div>
+          </div>
+
+          <div class="item">
+            <div class="twentytwenty-container" data-orientation="horizontal" ratio="0.5556">
+              <div class="desc">VideoLQ</div>
+              <div class="video">
+                <video muted autoplay="autoplay" loop="loop" width="100%">
+                  <source
+                    src="videos/lqs/videolq_013.mp4"
+                    type="video/mp4">
+                </video>
+              </div>
+              <div class="video">
+                <video muted autoplay="autoplay" loop="loop" width="100%">
+                  <source
+                    src="videos/hqs/videolq_013.mp4"
+                    type="video/mp4">
+                </video>
+              </div>
+            </div>
+          </div>
+
+          <div class="item">
+          <div class="twentytwenty-container" data-orientation="horizontal" ratio="0.5556">
+            <div class="desc">VideoLQ</div>
+            <div class="video">
+              <video muted autoplay="autoplay" loop="loop" width="100%">
+                <source src="videos/lqs/videolq_026.mp4" type="video/mp4">
+              </video> 
+            </div>
+            <div class="video">
+              <video muted autoplay="autoplay" loop="loop" width="100%">
+                <source src="videos/hqs/videolq_026.mp4" type="video/mp4">
+              </video> 
+            </div>
+          </div>
+        </div>
+
+          <div class="item">
+            <div class="twentytwenty-container" data-orientation="horizontal" ratio="0.5556">
+              <div class="desc">VideoLQ</div>
+              <div class="video">
+                <video muted autoplay="autoplay" loop="loop" width="100%">
+                  <source
+                    src="videos/lqs/videolq_032.mp4"
+                    type="video/mp4">
+                </video>
+              </div>
+              <div class="video">
+                <video muted autoplay="autoplay" loop="loop" width="100%">
+                  <source
+                    src="videos/hqs/videolq_032.mp4"
+                    type="video/mp4">
+                </video>
+              </div>
+            </div>
+          </div>
+
+          <div class="item">
+            <div class="twentytwenty-container" data-orientation="horizontal" ratio="0.5556">
+              <div class="desc">VideoLQ</div>
+              <div class="video">
+                <video muted autoplay="autoplay" loop="loop" width="100%">
+                  <source
+                    src="videos/lqs/videolq_015.mp4"
+                    type="video/mp4">
+                </video>
+              </div>
+              <div class="video">
+                <video muted autoplay="autoplay" loop="loop" width="100%">
+                  <source
+                    src="videos/hqs/videolq_015.mp4"
+                    type="video/mp4">
+                </video>
+              </div>
+            </div>
+          </div>
+
+          <!-- <div class="item">
+            <div class="twentytwenty-container" data-orientation="horizontal" ratio="0.5556">
+              <div class="desc">VideoLQ</div>
+              <div class="video">
+                <video muted autoplay="autoplay" loop="loop" width="100%">
+                  <source
+                    src="videos/lqs/videolq_045.mp4"
+                    type="video/mp4">
+                </video>
+              </div>
+              <div class="video">
+                <video muted autoplay="autoplay" loop="loop" width="100%">
+                  <source
+                    src="videos/hqs/videolq_045.mp4"
+                    type="video/mp4">
+                </video>
+              </div>
+            </div>
+          </div> -->
+
+          <div class="item">
+            <div class="twentytwenty-container" data-orientation="horizontal" ratio="0.5556">
+              <div class="desc">VideoLQ</div>
+              <div class="video">
+                <video muted autoplay="autoplay" loop="loop" width="100%">
+                  <source
+                    src="videos/lqs/videolq_046.mp4"
+                    type="video/mp4">
+                </video>
+              </div>
+              <div class="video">
+                <video muted autoplay="autoplay" loop="loop" width="100%">
+                  <source
+                    src="videos/hqs/videolq_046.mp4"
+                    type="video/mp4">
+                </video>
+              </div>
+            </div>
+          </div>
+
+          <div class="item">
+            <div class="twentytwenty-container" data-orientation="horizontal" ratio="0.5556">
+              <div class="desc">VideoLQ</div>
+              <div class="video">
+                <video muted autoplay="autoplay" loop="loop" width="100%">
+                  <source
+                    src="videos/lqs/videolq_044.mp4"
+                    type="video/mp4">
+                </video>
+              </div>
+              <div class="video">
+                <video muted autoplay="autoplay" loop="loop" width="100%">
+                  <source
+                    src="videos/hqs/videolq_044.mp4"
+                    type="video/mp4">
+                </video>
+              </div>
+            </div>
+          </div>
+
+          <div class="item">
+            <div class="twentytwenty-container" data-orientation="horizontal" ratio="0.5556">
+              <div class="desc">VideoLQ</div>
+              <div class="video">
+                <video muted autoplay="autoplay" loop="loop" width="100%">
+                  <source
+                    src="videos/lqs/videolq_028.mp4"
+                    type="video/mp4">
+                </video>
+              </div>
+              <div class="video">
+                <video muted autoplay="autoplay" loop="loop" width="100%">
+                  <source
+                    src="videos/hqs/videolq_028.mp4"
+                    type="video/mp4">
+                </video>
+              </div>
+            </div>
+          </div>
+
+          <!-- <div class="item">
+            <div class="twentytwenty-container" data-orientation="horizontal" ratio="0.5556">
+              <div class="desc">VideoLQ</div>
+              <div class="video">
+                <video muted autoplay="autoplay" loop="loop" width="100%">
+                  <source
+                    src="videos/lqs/videolq_031.mp4"
+                    type="video/mp4">
+                </video>
+              </div>
+              <div class="video">
+                <video muted autoplay="autoplay" loop="loop" width="100%">
+                  <source
+                    src="videos/hqs/videolq_031.mp4"
+                    type="video/mp4">
+                </video>
+              </div>
+            </div>
+          </div> -->
+
+          <div class="item">
+            <div class="twentytwenty-container" data-orientation="horizontal" ratio="0.5556">
+              <div class="desc">VideoLQ</div>
+              <div class="video">
+                <video muted autoplay="autoplay" loop="loop" width="100%">
+                  <source
+                    src="videos/lqs/videolq_011.mp4"
+                    type="video/mp4">
+                </video>
+              </div>
+              <div class="video">
+                <video muted autoplay="autoplay" loop="loop" width="100%">
+                  <source
+                    src="videos/hqs/videolq_011.mp4"
+                    type="video/mp4">
+                </video>
+              </div>
+            </div>
+          </div>
+
+          <div class="item">
+            <div class="twentytwenty-container" data-orientation="horizontal" ratio="0.5556">
+              <div class="desc">VideoLQ</div>
+              <div class="video">
+                <video muted autoplay="autoplay" loop="loop" width="100%">
+                  <source
+                    src="videos/lqs/videolq_014.mp4"
+                    type="video/mp4">
+                </video>
+              </div>
+              <div class="video">
+                <video muted autoplay="autoplay" loop="loop" width="100%">
+                  <source
+                    src="videos/hqs/videolq_014.mp4"
+                    type="video/mp4">
+                </video>
+              </div>
+            </div>
+          </div>
+
+          <!-- <div class="item">
+            <div class="twentytwenty-container" data-orientation="horizontal" ratio="0.5556">
+              <div class="desc">VideoLQ</div>
+              <div class="video">
+                <video muted autoplay="autoplay" loop="loop" width="100%">
+                  <source
+                    src="videos/lqs/videolq_040.mp4"
+                    type="video/mp4">
+                </video>
+              </div>
+              <div class="video">
+                <video muted autoplay="autoplay" loop="loop" width="100%">
+                  <source
+                    src="videos/hqs/videolq_040.mp4"
+                    type="video/mp4">
+                </video>
+              </div>
+            </div>
+          </div> -->
+
+          <!-- <div class="item">
+            <div class="twentytwenty-container" data-orientation="horizontal" ratio="0.5556">
+              <div class="desc">VideoLQ</div>
+              <div class="video">
+                <video muted autoplay="autoplay" loop="loop" width="100%">
+                  <source
+                    src="videos/lqs/videolq_047.mp4"
+                    type="video/mp4">
+                </video>
+              </div>
+              <div class="video">
+                <video muted autoplay="autoplay" loop="loop" width="100%">
+                  <source
+                    src="videos/hqs/videolq_047.mp4"
+                    type="video/mp4">
+                </video>
+              </div>
+            </div>
+          </div> -->
+
+          <!-- <div class="item">
+            <div class="twentytwenty-container" data-orientation="horizontal" ratio="0.5556">
+              <div class="desc">VideoLQ</div>
+              <div class="video">
+                <video muted autoplay="autoplay" loop="loop" width="100%">
+                  <source
+                    src="videos/lqs/videolq_048.mp4"
+                    type="video/mp4">
+                </video>
+              </div>
+              <div class="video">
+                <video muted autoplay="autoplay" loop="loop" width="100%">
+                  <source
+                    src="videos/hqs/videolq_048.mp4"
+                    type="video/mp4">
+                </video>
+              </div>
+            </div>
+          </div> -->
+
+          <div class="item">
+            <div class="twentytwenty-container" data-orientation="horizontal" ratio="0.5556">
+              <div class="desc">Anime</div>
+              <div class="video">
+                <video muted autoplay="autoplay" loop="loop" width="100%">
+                  <source
+                    src="videos/lqs/anime_0.mp4"
+                    type="video/mp4">
+                </video>
+              </div>
+              <div class="video">
+                <video muted autoplay="autoplay" loop="loop" width="100%">
+                  <source
+                    src="videos/hqs/anime_0.mp4"
+                    type="video/mp4">
+                </video>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+  </section>
+
+  <section class="teaser">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered has-text-centered">
+        <!-- <div class="column is-four-fifths"> -->
+        <div class="column">
+          <div class="content has-text-justified">
+            <ol type="a">
+              <br>
+              <b>
+                LiftVSR is capable of enhancing AIGC videos, real-world videos, and anime videos while maintaining excellent temporal consistency.
+              </b>
+            </ol>
+          </div>
+          <div class="hr"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container is-max-desktop">
+      <!-- Paper video. -->
+      <!-- <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3">Video</h2>
+          <div class="publication-video">
+            <iframe width="560" height="315" src="https://www.youtube.com/embed/aPpBs_B2iCY?si=mQbovE0ED-Xonm0o"
+              title="YouTube video player" frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+          </div>
+        </div>
+      </div> -->
+      <!--/ Paper video. -->
+      <!-- Abstract. -->
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <!-- <div class="column"> -->
+          <h2 class="title is-3">Abstract</h2>
+          <div class="content has-text-justified">
+            <p>
+              Diffusion models have significantly advanced video super-resolution (VSR) by enhancing perceptual quality,
+              largely through elaborately designed temporal modeling to ensure inter-frame consistency. However,
+              existing methods usually suffer from limited temporal coherence and prohibitively high computational costs
+              (e.g., typically requiring over 8 NVIDIA A100-80G GPUs), especially for long videos.
+              In this work, we propose <b>LiftVSR</b>, an efficient VSR framework that leverages and elevates the
+              image-wise
+              diffusion prior from PixArt-$\alpha$, achieving state-of-the-art results using only 4$\times$RTX 4090
+              GPUs. To balance long-term consistency and efficiency, we introduce a hybrid temporal modeling mechanism
+              that decomposes temporal learning into two complementary components: (i) <em>Dynamic Temporal Attention
+                (DTA)</em>
+              for fine-grained temporal modeling within short frame segment (\ie, low complexity), and (ii)
+              <em>Attention
+                Memory Cache (AMC)</em> for long-term temporal modeling across segments (\ie, consistency).
+              Specifically, DTA identifies multiple token flows across frames within multi-head query and key tokens to
+              warp inter-frame contexts in the value tokens. AMC adaptively aggregates historical segment information
+              via a cache unit, ensuring long-term coherence with minimal overhead. To further stabilize the cache
+              interaction during inference, we introduce an <em>asymmetric sampling strategy</em> that mitigates feature
+              mismatches arising from different diffusion sampling steps. Extensive experiments on several typical VSR
+              benchmarks have demonstrated that LiftVSR achieves impressive performance with significantly lower
+              computational costs.
+            </p>
+          </div>
+        </div>
+      </div>
+      <!--/ Abstract. -->
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered has-text-centered">
+        <!-- <div class="column is-four-fifths"> -->
+        <div class="column">
+          <h2 class="title is-3">Method</h2>
+          <div class="content has-text-justified">
+            <p>
+              In this paper, we propose a novel pipeline, LiftVSR, with hybrid temporal modeling mechanisms and
+              asymmetric sampling strategy.
+              The LiftVSR is built upon a pre-trained DiT model,
+              including Dynamic Temporal Attention (DTA) module for fine-grained temporal modeling within short-term
+              segments,
+              and Attention Memory Cache (AMC) module for long-term temporal feature propagation.
+              We further introduce an asymmetric sampling strategy to mitigate feature
+              mismatches arising from different diffusion sampling steps to enable flexible cache interaction across
+              segments.
+              With the proposed innovations, LiftVSR achieves significant improvements in temporal consistency
+              and visual quality while maintaining low training and inference costs.
+            </p>
+            <div class="column">
+              <img src="./images/liftvsr_pipe.png" />
+            </div>
+          </div>
+          <!-- Paper video. -->
+          <div class="column">
+            <h2 class="title is-3">Results</h2>
+            <div class="column">
+              <img src="./images/result1.png" />
+            </div>
+            <div class="column">
+              <img src="./images/result2.png" />
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- <section class="section" id="BibTeX">
+    <div class="container is-max-desktop content">
+      <h2 class="title">BibTeX</h2>
+      <pre><code>todo</code></pre>
+    </div>
+  </section> -->
+
+
+  <footer class="footer">
+    <div class="container">
+      <div class="content has-text-centered">
+        <a class="icon-link" href="https://arxiv.org/abs/2506.08529">
+          <i class="fas fa-file-pdf"></i>
+        </a>
+        <a class="icon-link" href="https://github.com/kopperx/LiftVSR" class="external-link" disabled>
+          <i class="fab fa-github"></i>
+        </a>
+      </div>
+      <div class="columns is-centered">
+        <div class="column is-8">
+          <div class="content">
+            <p>
+              This website is licensed under a <a rel="license"
+                href="http://creativecommons.org/licenses/by-sa/4.0/">Creative
+                Commons Attribution-ShareAlike 4.0 International License</a>.
+            </p>
+            <p>
+              Website adapted from the following <a href="https://github.com/nerfies/nerfies.github.io">source code</a>.
+            </p>
+          </div>
+        </div>
+      </div>
+      <!-- <div class="content has-text-centered">
+        <script type='text/javascript' id='clustrmaps'
+          src='//cdn.clustrmaps.com/map_v2.js?cl=ffffff&w=200&t=tt&d=10-CuR2vx0bgLM83PEg3DNG1E11-2OgEHiWgyo92kc4&co=2d78ad&ct=ffffff&cmo=3acc3a&cmn=ff5353'></script>
+      </div> -->
+    </div>
+  </footer>
+
+  <!-- Image Slider Javascripts -->
+  <!--=================Functions==========================-->
+  <!-- custom js file  -->
+  <!-- <script defer src="./assets/js/fontawesome.all.min.js"></script> -->
+  <script src="../static/js/bulma-carousel.min.js"></script>
+  <script src="../static/js/bulma-slider.min.js"></script>
+  <script src="../static/js/index.js"></script>
+  <script src="../static/js/jquery.event.move.js"></script>
+  <script src="../static/js/jquery.twentytwenty.js"></script>
+  <script>
+    $(function () {
+      $(".twentytwenty-container").twentytwenty();
+      // $(".twentytwenty-container", "#results-carousel").twentytwenty({default_offset_pct: 0.5, ratio: 0.5});
+    });
+  </script>
+
+
+
+</body>
+
+</html>
